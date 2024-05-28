@@ -3,6 +3,9 @@ import {
   getFirestore,
   collection,
   getDocs,
+  getDoc,
+  deleteDoc,
+  updateDoc,
   doc,
   setDoc,
   Timestamp,
@@ -54,7 +57,7 @@ export async function addTodos({ title }) {
     id: newTodoRef.id,
     title: title,
     is_done: false,
-    created_at: createdAtTimestamp,
+    created_at: createdAtTimestamp.toDate(),
   };
 
   await setDoc(newTodoRef, newTodoData);
@@ -62,4 +65,65 @@ export async function addTodos({ title }) {
   return newTodoData;
 }
 
-export default { fetchTodos, addTodos };
+// 단일 할일 조회
+export async function fetchATodo(id) {
+  if (id === null) {
+    return null;
+  }
+
+  const todoDocRef = doc(db, "todos", id);
+  const todoDocSnap = await getDoc(todoDocRef);
+
+  if (todoDocSnap.exists()) {
+    console.log("Document data:", todoDocSnap.data());
+
+    const fetchedTodo = {
+      id: todoDocSnap.id,
+      title: todoDocSnap.data()["title"],
+      is_done: todoDocSnap.data()["is_done"],
+      created_at: todoDocSnap.data()["created_at"].toDate(),
+      // .toLocaleTimeString('ko') - 한국 시간으로 표현
+    };
+
+    return fetchedTodo;
+  } else {
+    return null;
+  }
+}
+
+// 단일 할일 삭제
+export async function deleteATodo(id) {
+  const fetchedTodo = await fetchATodo(id);
+
+  if (fetchedTodo === null) {
+    return null;
+  }
+
+  await deleteDoc(doc(db, "todos", id));
+
+  return fetchedTodo;
+}
+
+// 단일 할일 수정
+export async function editATodo(id, { title, is_done }) {
+  const fetchedTodo = await fetchATodo(id);
+
+  if (fetchedTodo === null) {
+    return null;
+  }
+
+  const todoRef = doc(db, "todos", id);
+
+  await updateDoc(todoRef, {
+    title: title,
+    is_done: is_done,
+  });
+
+  return {
+    id: id,
+    title: title,
+    is_done: is_done,
+    created_at: fetchedTodo.created_at,
+  };
+}
+export default { fetchTodos, addTodos, fetchATodo, deleteATodo, editATodo };

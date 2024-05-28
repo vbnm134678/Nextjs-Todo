@@ -17,12 +17,18 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
 
 	const { title } = await request.json();
+
+	if (title === undefined) {
+		const errMessage = {
+			message: '할일을 작성해주세요',
+		};
+		return NextResponse.json(errMessage, { status: 422 });
+	}
 	const addedTodo = await addTodos({ title });
 
 	const response = {
 		message: '할일 추가 성공',
 		data: addedTodo,
 	};
-
 	return Response.json(response, { status: 201 });
 }
