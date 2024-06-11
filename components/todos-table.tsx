@@ -1,12 +1,38 @@
 "use client"
 
 import React, { useState } from "react";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input, Button, PopoverTrigger, PopoverContent, Popover } from "@nextui-org/react";
-import { Todo } from "@/types"
-
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input, Button, PopoverTrigger, PopoverContent, Popover, Spinner } from "@nextui-org/react";
+import { Todo } from "@/types";
+import { useRouter } from "next/navigation";
 const TodosTable = ({ todos }: { todos: Todo[] }) => {
+  // 할일 추가 가능 여부
   const [todoAddEnable, setTodoAddEnable] = useState(false);
+  // 할일
   const [newTodoInput, setNewTodoInput] = useState("");
+
+  // 로딩 상태
+  const [isLoading, setIsLoading] = useState<Boolean>(false);
+
+  const router = useRouter();
+
+  // 할일 추가하기
+  const addATodoHandler = async (title: string) => {
+    setIsLoading(true);
+
+    await new Promise(f => setTimeout(f, 1000));
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/todos`, {
+      method: 'post',
+      body: JSON.stringify({
+        title: title,
+      }),
+      cache: 'no-store',
+    });
+    setNewTodoInput('');
+    router.refresh();
+    setIsLoading(false);
+    setTodoAddEnable(false);
+    // console.log('할일 추가 완료 : ${newTodoInput}');
+  }
 
   // 할일 list row
   const TodoRow = (aTodo: Todo) => {
@@ -32,7 +58,7 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
   }
 
   return (
-    <>
+    <div className="flex flex-col space-y-2">
       <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
         <Input className="h-14" type="text" label="새로운 할일"
           value={newTodoInput}
@@ -41,10 +67,16 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
             setTodoAddEnable(changedInput.length > 0)
           }} />
         {todoAddEnable
-          ? <Button className="h-14" color="warning">할일 추가</Button>
+          ? <Button className="h-14" color="warning" onPress={async () => {
+            await addATodoHandler(newTodoInput);
+          }}>추가</Button>
           : disableTodoAddButton()
 
-        }      </div>
+        }
+      </div>
+      <div className="h-3">
+        {isLoading && <Spinner color="warning" size="sm" />}
+      </div>
       <Table aria-label="Example static collection table">
         <TableHeader>
           <TableColumn>ID</TableColumn>
@@ -58,7 +90,7 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
           ))}
         </TableBody>
       </Table>
-    </>
+    </div>
 
   );
 }
