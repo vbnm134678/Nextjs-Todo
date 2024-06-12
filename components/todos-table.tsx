@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input, Button, PopoverTrigger, PopoverContent, Popover, Spinner } from "@nextui-org/react";
 import { Todo } from "@/types";
 import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const TodosTable = ({ todos }: { todos: Todo[] }) => {
   // 할일 추가 가능 여부
   const [todoAddEnable, setTodoAddEnable] = useState(false);
@@ -12,6 +15,8 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
 
   // 로딩 상태
   const [isLoading, setIsLoading] = useState<Boolean>(false);
+  // toast
+  const notifyEvent = (msg: string) => toast.success(msg);
 
   const router = useRouter();
 
@@ -31,6 +36,7 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
     router.refresh();
     setIsLoading(false);
     setTodoAddEnable(false);
+    notifyEvent(title + " 추가 완료!");
     // console.log('할일 추가 완료 : ${newTodoInput}');
   }
 
@@ -59,6 +65,18 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
 
   return (
     <div className="flex flex-col space-y-2">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <div className="flex w-full flex-wrap md:flex-nowrap gap-4">
         <Input className="h-14" type="text" label="새로운 할일"
           value={newTodoInput}
