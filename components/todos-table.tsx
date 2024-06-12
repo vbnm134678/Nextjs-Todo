@@ -1,11 +1,12 @@
 "use client"
 
 import React, { useState } from "react";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input, Button, PopoverTrigger, PopoverContent, Popover, Spinner } from "@nextui-org/react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input, Button, PopoverTrigger, PopoverContent, Popover, Spinner, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
 import { Todo } from "@/types";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { VerticalDotsIcon } from "./icons"
 
 const TodosTable = ({ todos }: { todos: Todo[] }) => {
   // 할일 추가 가능 여부
@@ -47,6 +48,20 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
       <TableCell>{aTodo.title}</TableCell>
       <TableCell>{aTodo.is_done ? "완료" : "미완료"}</TableCell>
       <TableCell>{`${aTodo.created_at}`}</TableCell>
+      <TableCell>          <div className="relative flex justify-end items-center gap-2">
+        <Dropdown>
+          <DropdownTrigger>
+            <Button isIconOnly size="sm" variant="light">
+              <VerticalDotsIcon className="text-default-300" width={undefined} height={undefined} />
+            </Button>
+          </DropdownTrigger>
+          <DropdownMenu>
+            <DropdownItem>상세보기</DropdownItem>
+            <DropdownItem>수정</DropdownItem>
+            <DropdownItem>삭제</DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
+      </div></TableCell>
     </TableRow>
   }
   // 할일 추가버튼 popover
@@ -101,6 +116,7 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
           <TableColumn>할일</TableColumn>
           <TableColumn>완료여부</TableColumn>
           <TableColumn>생성일</TableColumn>
+          <TableColumn>액션</TableColumn>
         </TableHeader>
         <TableBody emptyContent={"No data to show"}>
           {todos && todos.map((aTodo: Todo) => (
