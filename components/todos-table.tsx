@@ -1,8 +1,17 @@
 "use client"
 
 import React, { useState } from "react";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Input, Button, PopoverTrigger, PopoverContent, Popover, Spinner, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@nextui-org/react";
-import { Todo } from "@/types";
+import {
+  Table,
+  TableHeader, TableColumn, TableBody, TableRow, TableCell,
+  Input,
+  Button,
+  PopoverTrigger, PopoverContent, Popover,
+  Spinner,
+  Dropdown, DropdownTrigger, DropdownMenu, DropdownItem,
+  Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure
+} from "@nextui-org/react";
+import { FocusedTodoType, Todo, CustomModalType } from "@/types";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,10 +25,14 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
 
   // 로딩 상태
   const [isLoading, setIsLoading] = useState<Boolean>(false);
-  // toast
-  const notifyEvent = (msg: string) => toast.success(msg);
 
   const router = useRouter();
+
+  // 모달 상태
+  const [currentModalData, setCurrentModalData] = useState<FocusedTodoType>({
+    focusedTodo: null,
+    modalType: 'detail' as CustomModalType
+  });
 
   // 할일 추가하기
   const addATodoHandler = async (title: string) => {
@@ -37,7 +50,7 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
     router.refresh();
     setIsLoading(false);
     setTodoAddEnable(false);
-    notifyEvent(title + " 추가 완료!");
+    notifyAddEvent(`${title} 추가 완료!`);
     // console.log('할일 추가 완료 : ${newTodoInput}');
   }
 
@@ -48,20 +61,26 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
       <TableCell>{aTodo.title}</TableCell>
       <TableCell>{aTodo.is_done ? "완료" : "미완료"}</TableCell>
       <TableCell>{`${aTodo.created_at}`}</TableCell>
-      <TableCell>          <div className="relative flex justify-end items-center gap-2">
-        <Dropdown>
-          <DropdownTrigger>
-            <Button isIconOnly size="sm" variant="light">
-              <VerticalDotsIcon className="text-default-300" width={undefined} height={undefined} />
-            </Button>
-          </DropdownTrigger>
-          <DropdownMenu>
-            <DropdownItem>상세보기</DropdownItem>
-            <DropdownItem>수정</DropdownItem>
-            <DropdownItem>삭제</DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
-      </div></TableCell>
+      <TableCell>
+        <div className="relative flex justify-end items-center gap-2">
+          <Dropdown>
+            <DropdownTrigger>
+              <Button isIconOnly size="sm" variant="light">
+                <VerticalDotsIcon className="text-default-300" width={undefined} height={undefined} />
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu onAction={(key) => {
+              console.log(`id : ${aTodo.id} / key: ${key}`);
+              setCurrentModalData({ focusedTodo: aTodo, modalType: key as CustomModalType })
+              onOpen();
+            }}>
+              <DropdownItem key="detail">상세보기</DropdownItem>
+              <DropdownItem key="edit">수정</DropdownItem>
+              <DropdownItem key="delete">삭제</DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        </div>
+      </TableCell>
     </TableRow>
   }
   // 할일 추가버튼 popover
@@ -78,8 +97,54 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
     </Popover>
   }
 
+  // 리액트 토스트
+  const notifyAddEvent = (msg: string) => toast.success(msg);
+  // 모달
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const ModalComponent = () => {
+    return <div>
+      <Modal backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">{currentModalData.modalType}</ModalHeader>
+              <ModalBody>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Nullam pulvinar risus non risus hendrerit venenatis.
+                  Pellentesque sit amet hendrerit risus, sed porttitor quam.
+                </p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Nullam pulvinar risus non risus hendrerit venenatis.
+                  Pellentesque sit amet hendrerit risus, sed porttitor quam.
+                </p>
+                <p>
+                  Magna exercitation reprehenderit magna aute tempor cupidatat consequat elit
+                  dolor adipisicing. Mollit dolor eiusmod sunt ex incididunt cillum quis.
+                  Velit duis sit officia eiusmod Lorem aliqua enim laboris do dolor eiusmod.
+                  Et mollit incididunt nisi consectetur esse laborum eiusmod pariatur
+                  proident Lorem eiusmod et. Culpa deserunt nostrud ad veniam.
+                </p>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button color="primary" onPress={onClose}>
+                  Action
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </div>
+  }
+
   return (
     <div className="flex flex-col space-y-2">
+      {ModalComponent()}
       <ToastContainer
         position="top-right"
         autoClose={5000}
