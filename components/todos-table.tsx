@@ -9,13 +9,14 @@ import {
   PopoverTrigger, PopoverContent, Popover,
   Spinner,
   Dropdown, DropdownTrigger, DropdownMenu, DropdownItem,
-  Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure
+  Modal, ModalContent, useDisclosure
 } from "@nextui-org/react";
 import { FocusedTodoType, Todo, CustomModalType } from "@/types";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { VerticalDotsIcon } from "./icons"
+import CustomModal from "./custom-modal";
 
 const TodosTable = ({ todos }: { todos: Todo[] }) => {
   // 할일 추가 가능 여부
@@ -50,7 +51,41 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
     router.refresh();
     setIsLoading(false);
     setTodoAddEnable(false);
-    notifyAddEvent(`${title} 추가 완료!`);
+    notifySuccessEvent(`${title} 추가 완료!`);
+    // console.log('할일 추가 완료 : ${newTodoInput}');
+  }
+
+  // 할일 수정하기
+  const editATodoHandler = async (id: string, editedTitle: string, editedIsDone: boolean) => {
+    setIsLoading(true);
+
+    await new Promise(f => setTimeout(f, 600));
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/todos/${id}`, {
+      method: 'post',
+      body: JSON.stringify({
+        title: editedTitle,
+        is_done: editedIsDone,
+      }),
+      cache: 'no-store',
+    });
+    router.refresh();
+    setIsLoading(false);
+    notifySuccessEvent(`할일 수정 완료!`);
+    // console.log('할일 추가 완료 : ${newTodoInput}');
+  }
+
+  // 할일 삭제하기
+  const deleteATodoHandler = async (id: string) => {
+    setIsLoading(true);
+
+    await new Promise(f => setTimeout(f, 600));
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/todos/${id}`, {
+      method: 'delete',
+      cache: 'no-store',
+    });
+    router.refresh();
+    setIsLoading(false);
+    notifySuccessEvent(`할일 삭제 완료!`);
     // console.log('할일 추가 완료 : ${newTodoInput}');
   }
 
@@ -59,7 +94,7 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
     return <TableRow key={aTodo.id}>
       <TableCell>{aTodo.id.slice(0, 5)}</TableCell>
       <TableCell>{aTodo.title}</TableCell>
-      <TableCell>{aTodo.is_done ? "완료" : "미완료"}</TableCell>
+      <TableCell>{aTodo.is_done ? "✅" : "⚡"}</TableCell>
       <TableCell>{`${aTodo.created_at}`}</TableCell>
       <TableCell>
         <div className="relative flex justify-end items-center gap-2">
@@ -71,7 +106,10 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
             </DropdownTrigger>
             <DropdownMenu onAction={(key) => {
               console.log(`id : ${aTodo.id} / key: ${key}`);
-              setCurrentModalData({ focusedTodo: aTodo, modalType: key as CustomModalType })
+              setCurrentModalData({
+                focusedTodo: aTodo,
+                modalType: key as CustomModalType
+              })
               onOpen();
             }}>
               <DropdownItem key="detail">상세보기</DropdownItem>
@@ -98,7 +136,7 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
   }
 
   // 리액트 토스트
-  const notifyAddEvent = (msg: string) => toast.success(msg);
+  const notifySuccessEvent = (msg: string) => toast.success(msg);
   // 모달
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const ModalComponent = () => {
@@ -106,36 +144,19 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
       <Modal backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">{currentModalData.modalType}</ModalHeader>
-              <ModalBody>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Nullam pulvinar risus non risus hendrerit venenatis.
-                  Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                </p>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Nullam pulvinar risus non risus hendrerit venenatis.
-                  Pellentesque sit amet hendrerit risus, sed porttitor quam.
-                </p>
-                <p>
-                  Magna exercitation reprehenderit magna aute tempor cupidatat consequat elit
-                  dolor adipisicing. Mollit dolor eiusmod sunt ex incididunt cillum quis.
-                  Velit duis sit officia eiusmod Lorem aliqua enim laboris do dolor eiusmod.
-                  Et mollit incididunt nisi consectetur esse laborum eiusmod pariatur
-                  proident Lorem eiusmod et. Culpa deserunt nostrud ad veniam.
-                </p>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
-                  Close
-                </Button>
-                <Button color="primary" onPress={onClose}>
-                  Action
-                </Button>
-              </ModalFooter>
-            </>
+            (currentModalData.focusedTodo &&
+              <CustomModal
+                focusedTodo={currentModalData.focusedTodo}
+                modalType={currentModalData.modalType}
+                onClose={onClose}
+                onEdit={async (id, title, isDone) => {
+                  await editATodoHandler(id, title, isDone);
+                  onClose();
+                }}
+                onDelete={async (id) => {
+                  await deleteATodoHandler(id);
+                  onClose();
+                }} />)
           )}
         </ModalContent>
       </Modal>
