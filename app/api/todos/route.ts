@@ -30,5 +30,5 @@ export async function POST(request: NextRequest) {
 		message: '할일 추가 성공',
 		data: addedTodo,
 	};
-	return Response.json(response, { status: 201 });
+	return NextResponse.json(response, { status: 201 });
 }

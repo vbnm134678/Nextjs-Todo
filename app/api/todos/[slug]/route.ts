@@ -12,7 +12,7 @@ export async function GET(request: NextRequest,
 
 	console.log(fetchedTodo);
 	if (fetchedTodo === null) {
-		return new Response(null, { status: 204 });
+		return new NextResponse(null, { status: 204 });
 	}
 	const response = {
 		message: '단일 가져오기 성공',
@@ -28,7 +28,7 @@ export async function DELETE(request: NextRequest,
 	const deletedTodo = await deleteATodo(params.slug);
 
 	if (deletedTodo === null) {
-		return new Response(null, { status: 204 });
+		return new NextResponse(null, { status: 204 });
 	}
 	const response = {
 		message: '단일 삭제 성공',
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest,
 	const editedTodo = await editATodo(params.slug, { title, is_done });
 
 	if (editedTodo === null) {
-		return new Response(null, { status: 204 });
+		return new NextResponse(null, { status: 204 });
 	}
 
 	const response = {
