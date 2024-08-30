@@ -99,7 +99,7 @@ const TodosTable = ({ todos }: { todos: Todo[] }) => {
       <TableCell className={checkIsDone(aTodo.is_done)}>{aTodo.id.slice(0, 5)}</TableCell>
       <TableCell className={checkIsDone(aTodo.is_done)}>{aTodo.title}</TableCell>
       <TableCell>{aTodo.is_done ? "✅" : "⚡"}</TableCell>
-      <TableCell className={checkIsDone(aTodo.is_done)}>{`${aTodo.created_at}`}</TableCell>
+      <TableCell className={checkIsDone(aTodo.is_done)}>{`${aTodo.created_at}`.substring(0, 10)}</TableCell>
       <TableCell>
         <div className="relative flex justify-end items-center gap-2">
           <Dropdown>

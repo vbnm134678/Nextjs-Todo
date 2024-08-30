@@ -31,7 +31,7 @@ const CustomModal = ({ focusedTodo, modalType, onClose, onEdit, onDelete }: {
           </div>
           <div className="flex space-x-1">
             <span>작성일 :</span>
-            <p>{`${focusedTodo.created_at}`}</p>
+            <p>{`${focusedTodo.created_at}`.substring(0, 10)}</p>
           </div>
         </ModalBody>
         <ModalFooter>

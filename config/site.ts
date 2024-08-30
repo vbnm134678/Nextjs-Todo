@@ -64,10 +64,11 @@ export const siteConfig = {
     },
   ],
   links: {
-    github: "https://github.com/nextui-org/nextui",
+    github: "https://github.com/vbnm134678/nextjs-todo",
     twitter: "https://twitter.com/getnextui",
     docs: "https://nextui.org",
     discord: "https://discord.gg/9b6yyZKmH4",
     sponsor: "https://patreon.com/jrgarciadev",
+    notion: "https://www.notion.so/c12b53f1885d4938aa0cc54ddb41b47f?v=a5cac87d0d1f4f0e9091e4ce618d7ad2&p=968196930e5d4865a3dc95ce9167747d&pm=c"
   },
 };
