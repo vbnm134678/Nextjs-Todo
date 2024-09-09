@@ -2,6 +2,10 @@ import { title } from "@/components/primitives";
 import TodosTable from "@/components/todos-table";
 import { fetchTodos } from "@/data/firestore";
 
+export const metadata = {
+  title: 'Daily Todos',
+}
+
 async function fetchTodosApiCall() {
   console.log("fetch todos api called");
   const res = await fetch(`${process.env.BASE_URL}/api/todos`, { cache: 'no-store' });
